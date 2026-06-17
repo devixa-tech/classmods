@@ -1,6 +1,0 @@
-include README.md
-include LICENSE
-exclude test/*
-prune test
-exclude dev/*
-prune dev

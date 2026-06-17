@@ -24,8 +24,7 @@ jobs:
 
       # Install build tools
       - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip setuptools wheel build twine
+        run: python -m pip install --upgrade setuptools wheel build
 
       # Build the distribution files
       - name: Build the package
@@ -35,6 +34,5 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: dist/
-        env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
