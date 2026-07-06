@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "classmods"
-dynamic = ["version", "description", "authors", "keywords"]
+authors = [{name="devixa-dev", email="hmohammad2520@gmail.com"}]
+keywords = ["python", "class", "mods", "modification", "descriptors", "methods", "methodmod", "methodobserve"]
+dynamic = ["version", "description"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -16,11 +18,10 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = {file = "LICENSE"}
 
+
 [tool.setuptools.dynamic]
+description = {file = "DESCRIPTION.txt"}
 version = {attr = "classmods.__version__"}
-description = {attr = "classmods.__description__"}
-authors = {attr = "classmods.__authors__"}
-keywords = {attr = "classmods.__keywords__"}
 
 
 [tool.setuptools]
