@@ -1,8 +1,10 @@
-from ._decorators import logwrap, suppress_errors
-from ._descriptors import ConstantAttrib, RemoteAttrib
+from ._constant_attrib import ConstantAttrib
 from ._env_mod import ENVMod
+from ._logwrap import logwrap
 from ._method_monitor import MethodMonitor
+from ._remote_attrib import RemoteAttrib
 from ._super_with import SuperWith
+from ._supress_errors import suppress_errors
 
 __version__ = '1.2.2'
 __description__ = "Simple mods for python classes."
@@ -22,10 +24,10 @@ __keywords__ = [
 
 __all__ = [
     'ConstantAttrib',
-    'RemoteAttrib',
     'ENVMod',
-    'MethodMonitor',
     'logwrap',
-    'suppress_errors',
+    'MethodMonitor',
+    'RemoteAttrib',
     'SuperWith',
+    'suppress_errors',
 ]
