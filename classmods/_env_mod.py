@@ -142,21 +142,27 @@ class _Section:
         if item._name not in self._order:
             self._order.append(item._name)
 
-    def _generate(self) -> str:
+    def _generate(self, with_values: bool = False) -> str:
         lines: List[str] = []
         lines.append("#" * (len(self._name) + 24))
         lines.append(f"########### {self._name} ###########")
         for name in self._order:
             item = self._items[name]
-            lines.append(f"###### {item._name} {'(Required)' if item._required else ''}")
+            value = None
+            if with_values:
+                value = item.load_value()
+
             lines.append("####")
             if item._description:
                 lines.extend(f"## {line.strip()}" for line in item._description)
             lines.append(f"## Default={item._default}")
             lines.append("####")
-            lines.append(f"{item._env_key}=")
             lines.append("")
-        lines.append("#" * (len(self._name) + 24))
+            lines.append(
+                f"{item._env_key}={item.load_value() if value is not None else ''}"
+            )
+            lines.append("")
+
         return "\n".join(lines)
 
     def __repr__(self) -> str:
@@ -188,12 +194,15 @@ class _ENVFile:
             self._sections[lookup] = section
             return section
 
-    def _generate(self) -> str:
-        return "\n".join(sec._generate() for sec in self._sections.values())
+    def _generate(self, with_values: bool = False) -> str:
+        return "\n".join(sec._generate(with_values) for sec in self._sections.values())
 
-    def _save_as_file(self, path: str) -> None:
+    def _save_as_file(self, path: str, with_values: bool = False) -> None:
         with open(path, "w") as f:
-            f.write(self._generate())
+            f.write(self._generate(with_values))
+            f.write(
+                '\n\n# NOTE: This file generated via script, only modify values.\n'
+            )
 
     def get_all_env_keys(self) -> List[str]:
         keys: List[str] = []
@@ -336,6 +345,21 @@ class ENVMod:
         if section is None:
             raise ValueError(f"Function not registered: {func.__name__}")
         return {name: section._items[name].load_value() for name in section._order}
+
+    @classmethod
+    def save_file(cls, path: str = ".env", with_values: bool = False) -> None:
+        """
+        Saves env file based on registerd items.
+        if with_values is set, it will create the env file with the current values.
+
+        If you want to sync the keys and env file without breaking, use `load_dotenv` first.
+
+        Args:
+            path(str): File path. (default+".env")
+            with_values(bool): save with values.
+
+        """
+        cls._envfile._save_as_file(path, with_values)
 
     @classmethod
     def save_example(cls, path: str = ".env_example") -> None:
