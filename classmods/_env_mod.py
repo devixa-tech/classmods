@@ -1,4 +1,5 @@
-import os, inspect
+import os
+import inspect
 from functools import wraps
 from typing import (
     Literal,
@@ -28,20 +29,23 @@ class _Item:
     Represents a single environment variable with metadata, type casting,
     default handling, and formatting support for .env example generation.
     """
+
     def __init__(
-            self,
-            name: str,
-            type_hint: Any,
-            prefix: str = '',
-            description: Optional[List[str]] = None,
-            required: bool = False,
-            default: Optional[Any] = None
-        ) -> None:
+        self,
+        name: str,
+        type_hint: Any,
+        prefix: str = '',
+        description: Optional[List[str]] = None,
+        required: bool = False,
+        default: Optional[Any] = None
+    ) -> None:
         self._name = name
         self._prefix = prefix
         self._default = default
         self._required = required
-        self._description = [line.strip() + '\n' for line in (description or [])]
+        self._description = [
+            line.strip() + '\n' for line in (description or [])
+        ]
         self._value = None
         self._normal_type = self._normalize_type(type_hint)
         self._env_key = self._generate_env_key()
@@ -73,17 +77,20 @@ class _Item:
             return str
 
         raise TypeError(
-                f"Cannot register parameter '{self._name}' of type '{type_hint}'"
-            )
+            f"Cannot register parameter '{self._name}' of type '{type_hint}'"
+        )
 
     def cast(self, value: str) -> ENVParsable | None:
         """
         Cast the string value to its type_hint.
         """
         if self._normal_type == bool:
-            if value.lower() in ("1", "true", "yes"): return True
-            if value.lower() in ("0", "false", "no"): return False
-            if value.lower() in ("none", "null"): return None
+            if value.lower() in ("1", "true", "yes"):
+                return True
+            if value.lower() in ("0", "false", "no"):
+                return False
+            if value.lower() in ("none", "null"):
+                return None
             raise ValueError(f"Invalid boolean: {value}")
         if value is None:
             return None
@@ -97,7 +104,9 @@ class _Item:
         if value is None or value == "":
             if self._required:
                 self._value = None
-                raise ValueError(f"This env is required and can't be None: {self._env_key}")
+                raise ValueError(
+                    f"This env is required and can't be None: {self._env_key}"
+                )
             elif self._default is not None:
                 self._value = self._default
                 return self._default
@@ -106,7 +115,6 @@ class _Item:
                 return None
         self._value = value
         return self.cast(value)
-
 
     def __str__(self) -> str:
         return f"{self._env_key}={self._value or self._default if self._default is not None else ''}"
@@ -120,11 +128,12 @@ class _Section:
     Represents a logical group of environment variables, typically tied to a class or component.
     Holds multiple _Item instances and provides formatted string output for .env_example sections.
     """
+
     def __init__(
-            self,
-            name: str,
-            key: Optional[Any] = None
-        ) -> None:
+        self,
+        name: str,
+        key: Optional[Any] = None
+    ) -> None:
 
         self._name = name.upper()
         self._key = key
@@ -132,11 +141,13 @@ class _Section:
         self._order: List[str] = []
 
     def add_item(
-                self,
-                item: _Item,
-            ) -> None:
+        self,
+        item: _Item,
+    ) -> None:
         if item._name in self._items:
-            raise ValueError(f"Duplicate parameter '{item._name}' in section '{self._name}'")
+            raise ValueError(
+                f"Duplicate parameter '{item._name}' in section '{self._name}'"
+            )
 
         self._items[item._name] = item
         if item._name not in self._order:
@@ -168,25 +179,28 @@ class _ENVFile:
     Handles generation of the .env_example file based on the current
     registered environment sections and items.
     """
+
     def __init__(self) -> None:
         self._sections: Dict[tuple[str, Optional[Any]], _Section] = {}
 
     def get_or_create(self, section_name: Optional[str] = None, key: Optional[Any] = None) -> _Section:
-            if section_name:
-                # Shared section by name: ignore key
-                lookup = (section_name, None)
-            elif key:
-                # Unique section per function
-                lookup = (str(key), key)
-            else:
-                raise ValueError("Either section_name or key must be specified.")
+        if section_name:
+            # Shared section by name: ignore key
+            lookup = (section_name, None)
+        elif key:
+            # Unique section per function
+            lookup = (str(key), key)
+        else:
+            raise ValueError(
+                "Either section_name or key must be specified."
+            )
 
-            if lookup in self._sections:
-                return self._sections[lookup]
+        if lookup in self._sections:
+            return self._sections[lookup]
 
-            section = _Section(section_name if section_name else str(key), key)
-            self._sections[lookup] = section
-            return section
+        section = _Section(section_name if section_name else str(key), key)
+        self._sections[lookup] = section
+        return section
 
     def _generate(self) -> str:
         return "\n".join(sec._generate() for sec in self._sections.values())
@@ -212,13 +226,13 @@ class ENVMod:
 
     @classmethod
     def register(
-            cls,
-            *,
-            section_name: Optional[str] = None,
-            exclude: Optional[List[str]] = None,
-            cast: Optional[Dict[str, ENVParsableTypes]] = None,
-            shared_parameters: bool = False,
-        ) -> Callable:
+        cls,
+        *,
+        section_name: Optional[str] = None,
+        exclude: Optional[List[str]] = None,
+        cast: Optional[Dict[str, ENVParsableTypes]] = None,
+        shared_parameters: bool = False,
+    ) -> Callable:
         """
         Decorator to register a class or instance method for environment variable parsing.
 
@@ -275,7 +289,9 @@ class ENVMod:
             sig = inspect.signature(func)
             # Use section_name if provided, otherwise unique section per function
             sec_name = section_name or func.__qualname__.replace(".", "_")
-            section = cls._envfile.get_or_create(sec_name, key=None if section_name else func)
+            section = cls._envfile.get_or_create(
+                sec_name, key=None if section_name else func
+            )
 
             doc_lines = (inspect.getdoc(func) or "").splitlines()
             type_hints = get_type_hints(func)
@@ -287,8 +303,12 @@ class ENVMod:
                 item = _Item(
                     name=param.name,
                     prefix=section._name,
-                    type_hint=cast[param.name] if cast and param.name in cast else type_hints.get(param.name, str),
-                    description=[line.strip() for line in doc_lines if param.name in line.lower()],
+                    type_hint=cast[param.name] if cast and param.name in cast else type_hints.get(
+                        param.name, str
+                    ),
+                    description=[
+                        line.strip() for line in doc_lines if param.name in line.lower()
+                    ],
                     default=None if param.default is inspect.Parameter.empty else param.default,
                     required=param.default is inspect.Parameter.empty,
                 )
@@ -376,7 +396,6 @@ class ENVMod:
         with open(path, "w") as f:
             f.write("\n".join(lines) + "\n")
 
-
     @staticmethod
     def load_dotenv(*args: Any, **kwargs: Any) -> None:
         """
@@ -386,4 +405,6 @@ class ENVMod:
             from dotenv import load_dotenv
             load_dotenv(*args, **kwargs)
         except ImportError:
-            raise NotImplementedError("Install python-dotenv for this feature: `pip install python-dotenv`")
+            raise NotImplementedError(
+                "Install python-dotenv for this feature: `pip install python-dotenv`"
+            )
