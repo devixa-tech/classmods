@@ -155,15 +155,30 @@ class _Section:
 
     def _generate(self) -> str:
         lines: List[str] = []
-        lines.append("#" * (len(self._name) + 24))
-        lines.append(f"########### {self._name} ###########")
+        # Section Header
+        lines.append(f"###### {self._name}")
+
+        # Items:
         for name in self._order:
             item = self._items[name]
             lines.append(f"###### {item._name} {'(Required)' if item._required else ''}")
             lines.append("####")
+
+            # Name
+            lines.append(
+                f"## {item._name}{' (Required)' if item._required else ''}"
+            )
+
+            # Default
+            if item._default is not None:
+                lines.append(f"## Default={item._default}")
+
+            # Description lines
             if item._description:
-                lines.extend(f"## {line.strip()}" for line in item._description)
-            lines.append(f"## Default={item._default}")
+                lines.extend(
+                    f"## {line.strip()}" for line in item._description
+                )
+
             lines.append("####")
             lines.append(f"{item._env_key}=")
             lines.append("")
