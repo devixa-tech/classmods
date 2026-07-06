@@ -1,3 +1,4 @@
+from ._classproperty import classproperty
 from ._constant_attrib import ConstantAttrib
 from ._env_mod import ENVMod
 from ._logwrap import logwrap
@@ -23,6 +24,7 @@ __keywords__ = [
 ]
 
 __all__ = [
+    'classproperty',
     'ConstantAttrib',
     'ENVMod',
     'logwrap',
