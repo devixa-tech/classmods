@@ -8,9 +8,11 @@ from typing import (
     Dict,
     Any,
     Callable,
+    ParamSpec,
     Set,
     Type,
     TypeAlias,
+    TypeVar,
     Union,
     get_type_hints
 )
@@ -22,7 +24,8 @@ except ImportError:
 
 ENVParsableTypes: TypeAlias = Type[str | int | float | bool]
 ENVParsable: TypeAlias = str | int | float | bool
-
+P = ParamSpec("P")
+R = TypeVar("R")
 
 class _Item:
     """
@@ -256,7 +259,7 @@ class ENVMod:
         exclude: Optional[List[str]] = None,
         cast: Optional[Dict[str, ENVParsableTypes]] = None,
         shared_parameters: bool = False,
-    ) -> Callable:
+    ) -> Callable[[Callable[P, R]], Callable[P, R]]:
         """
         Decorator to register a class or instance method for environment variable parsing.
 
@@ -309,7 +312,7 @@ class ENVMod:
         """
         exclude = exclude or []
 
-        def decorator(func: Callable) -> Callable:
+        def decorator(func: Callable[P, R]) -> Callable[P, R]:
             sig = inspect.signature(func)
             # Use section_name if provided, otherwise unique section per function
             sec_name = section_name or func.__qualname__.replace(".", "_")
@@ -354,10 +357,10 @@ class ENVMod:
                 section.add_item(item)
 
             @wraps(func)
-            def wrapper(*args: Any, **kwargs: Any) -> Any:
+            def wrapper(*args: P.args, **kwargs: P.kwargs) -> Any:
                 if kwargs.pop("envmod_loader", False):
                     loaded_args = cls.load_args(func)
-                    kwargs = {**loaded_args, **kwargs}
+                    kwargs = {**loaded_args, **kwargs}  # type: ignore
                 return func(*args, **kwargs)
 
             cls._registry[wrapper] = section
@@ -366,7 +369,7 @@ class ENVMod:
         return decorator
 
     @classmethod
-    def load_args(cls, func: Callable) -> Dict[str, Any]:
+    def load_args(cls, func: Callable[..., Any]) -> Dict[str, Any]:
         """
         Load registered function/class args from environment variables.
 
