@@ -7,7 +7,7 @@ from ._remote_attrib import RemoteAttrib
 from ._super_with import SuperWith
 from ._supress_errors import suppress_errors
 
-__version__ = '1.2.2'
+__version__ = '1.3.0'
 __description__ = "Simple mods for python classes."
 __authors__ = [
     {"name": "devixa-dev", "email": "hmohammad2520@gmail.com"},
