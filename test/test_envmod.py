@@ -62,27 +62,30 @@ class TestClass:
         self.password = password
 
 
+test_values = {
+    'TESTCLASS_NAME': 'test_name',
+    'TESTCLASS_PATH': '/opt/my_service',
+    'CONNECTION_PORT': '123',
+    'CONNECTION_HOST': '127.0.0.1',
+    'CONNECTION_TIMEOUT': '1.43',
+    'CONNECTION_PASSWORD': '',
+}
+
+
 def test_file_creations():
     if not os.path.exists('.temp'):
         os.mkdir('.temp')
 
+    # Setting values and saving.
+    os.environ.update(test_values)
     ENVMod.save_example('.temp/env_example.txt')
-    ENVMod.sync_env_file()
+    ENVMod.save_file(with_values=True)
+
     assert os.path.exists('.temp/env_example.txt')
     assert os.path.exists('.env')
 
-    with open('.env', 'w') as f:
-        f.writelines([
-            'TESTCLASS_NAME=test_name\n',
-            'TESTCLASS_PATH=/opt/my_service\n',
-            'CONNECTION_PORT=123\n',
-            'CONNECTION_HOST=127.0.0.1\n',
-            'CONNECTION_TIMEOUT=1.43\n',
-            'CONNECTION_PASSWORD=\n',
-        ])
-
 def test_env_vars():
-    ENVMod.sync_env_file()
+    test_file_creations()
     ENVMod.load_dotenv()
     assert 'TESTCLASS_NAME' in os.environ
     assert 'TESTCLASS_PATH' in os.environ
@@ -92,7 +95,7 @@ def test_env_vars():
     assert 'CONNECTION_PASSWORD' in os.environ
 
 def test_env_values():
-    ENVMod.sync_env_file()
+    test_file_creations()
     ENVMod.load_dotenv()
     assert os.environ.get('TESTCLASS_NAME') == 'test_name'
     assert os.environ.get('TESTCLASS_PATH') == '/opt/my_service'
@@ -102,7 +105,7 @@ def test_env_values():
     assert os.environ.get('CONNECTION_PASSWORD') == ''
 
 def test_load_args():
-    ENVMod.sync_env_file()
+    test_file_creations()
     ENVMod.load_dotenv()
     test_object = TestClass(**ENVMod.load_args(TestClass.__init__))
     test_object.connect(**ENVMod.load_args(TestClass.connect))
