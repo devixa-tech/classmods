@@ -230,8 +230,10 @@ class _ENVFile:
         return "\n".join(sec._generate(with_values) for sec in self._sections.values())
 
     def _save_as_file(self, path: str, with_values: bool = False) -> None:
+        file_content = self._generate(with_values)
+
         with open(path, "w") as f:
-            f.write(self._generate(with_values))
+            f.write(file_content)
             f.write(
                 '\n\n# NOTE: This file generated via script, only modify values.\n'
             )
