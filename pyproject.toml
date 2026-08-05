@@ -21,7 +21,7 @@ license = {file = "LICENSE"}
 
 
 [tool.setuptools.dynamic]
-version = {attr = "classmods.__version__"}
+version = {attr = "classmods.version"}
 
 
 [tool.setuptools]

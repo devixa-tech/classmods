@@ -1,3 +1,4 @@
+from .__version__ import version
 from ._classproperty import classproperty
 from ._constant_attrib import ConstantAttrib
 from ._env_mod import ENVMod
@@ -7,7 +8,6 @@ from ._remote_attrib import RemoteAttrib
 from ._super_with import SuperWith
 from ._supress_errors import suppress_errors
 
-__version__ = '1.3.0'
 
 __all__ = [
     'classproperty',
