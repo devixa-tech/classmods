@@ -32,7 +32,7 @@ class TestClass:
             host: str,
             port: int,
             timeout: float,
-            password: Optional[int] = None,
+            password: Optional[str] = None,
         ) -> None:
         """
         Test method connect.
@@ -54,7 +54,7 @@ class TestClass:
         host: str,
         port: int,
         timeout: float,
-        password: Optional[int] = None,
+        password: Optional[str] = None,
     ) -> None:
         self.host = host
         self.port = port
@@ -68,21 +68,23 @@ test_values = {
     'CONNECTION_PORT': '123',
     'CONNECTION_HOST': '127.0.0.1',
     'CONNECTION_TIMEOUT': '1.43',
-    'CONNECTION_PASSWORD': '',
 }
 
 
 def test_file_creations():
+    example_file = '.temp/.env_example'
+    env_file = '.temp/.env'
+
     if not os.path.exists('.temp'):
         os.mkdir('.temp')
 
     # Setting values and saving.
     os.environ.update(test_values)
-    ENVMod.save_file('.temp/env_example.txt')
-    ENVMod.save_file(with_values=True)
+    ENVMod.save_file(example_file)
+    ENVMod.save_file(env_file, with_values=True)
 
-    assert os.path.exists('.temp/env_example.txt')
-    assert os.path.exists('.env')
+    assert os.path.exists(example_file)
+    assert os.path.exists(env_file)
 
 def test_env_vars():
     test_file_creations()
@@ -92,7 +94,9 @@ def test_env_vars():
     assert 'CONNECTION_PORT' in os.environ
     assert 'CONNECTION_HOST' in os.environ
     assert 'CONNECTION_TIMEOUT' in os.environ
-    assert 'CONNECTION_PASSWORD' in os.environ
+
+    # This should be commented in ENVFile
+    assert 'CONNECTION_PASSWORD' not in os.environ
 
 def test_env_values():
     test_file_creations()
@@ -102,7 +106,7 @@ def test_env_values():
     assert os.environ.get('CONNECTION_PORT') == '123'
     assert os.environ.get('CONNECTION_HOST') == '127.0.0.1'
     assert os.environ.get('CONNECTION_TIMEOUT') == '1.43'
-    assert os.environ.get('CONNECTION_PASSWORD') == ''
+    assert os.environ.get('CONNECTION_PASSWORD') == None
 
 def test_load_args():
     test_file_creations()

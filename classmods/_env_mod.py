@@ -98,8 +98,10 @@ class _Item:
             if value.lower() in ("none", "null"):
                 return None
             raise ValueError(f"Invalid boolean: {value}")
+
         if value is None:
             return None
+
         return self._normal_type(value)
 
     def load_value(self) -> ENVParsable | None:
@@ -107,7 +109,7 @@ class _Item:
         Loads the value from env.
         """
         value = os.environ.get(self._env_key)
-        if value is None or value == "":
+        if value is None:
             if self._required:
                 self._value = None
                 raise ValueError(
@@ -190,9 +192,11 @@ class _Section:
 
             lines.append("####")
             lines.append("")
-            lines.append(
-                f"{item._env_key}={item.load_value() if value is not None else ''}"
-            )
+            if value is not None and value != item._default:
+                lines.append(f"{item._env_key}={value}")
+            else:
+                lines.append(f"#{item._env_key}=")
+    
             lines.append("")
 
         return "\n".join(lines)
