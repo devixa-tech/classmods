@@ -1,5 +1,7 @@
 import os
 import inspect
+import warnings
+from typing_extensions import deprecated
 from functools import wraps
 from typing import (
     Literal,
@@ -26,6 +28,7 @@ ENVParsableTypes: TypeAlias = Type[str | int | float | bool]
 ENVParsable: TypeAlias = str | int | float | bool
 P = ParamSpec("P")
 R = TypeVar("R")
+
 
 class _Item:
     """
@@ -390,9 +393,9 @@ class ENVMod:
     def save_file(cls, path: str = ".env", with_values: bool = False) -> None:
         """
         Saves env file based on registerd items.
-        if with_values is set, it will create the env file with the current values.
-
-        If you want to sync the keys and env file without breaking, use `load_dotenv` first.
+        if with_values is set, it will create the env file with the current env values.
+        If you want to sync the keys and env file without removing current file, use 'load_dotenv' before saving new file.
+        NOTE: This implementation does not consider the current contents of the file and will generate new file based current environment values
 
         Args:
             path(str): File path. (default+".env")
@@ -402,6 +405,9 @@ class ENVMod:
         cls._envfile._save_as_file(path, with_values)
 
     @classmethod
+    @deprecated(
+        "ENVMod.save_example is deprecated and will be removed in version 1.4. Use save_file instead."
+    )
     def save_example(cls, path: str = ".env_example") -> None:
         """
         Save an example .env file based on all registered items.
@@ -409,14 +415,29 @@ class ENVMod:
         WARNING: Do not store your values in the example file,
         it gets overwritten on secound execution.
         """
+        warnings.warn(
+            "ENVMod.save_example is deprecated and will be removed in version 1.4. Use save_file instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
         cls._envfile._save_as_file(path)
 
     @classmethod
+    @deprecated(
+        ("ENVMod.sync_env_file is deprecated and will be removed in version 1.4. "
+         "Use save_file with 'with_values' parameter for same result"),
+    )
     def sync_env_file(cls, path: str = ".env") -> None:
         """
         Merge existing .env file with missing expected keys
         while preserving definition order.
         """
+        warnings.warn(
+            ("ENVMod.sync_env_file is deprecated and will be removed in version 1.4. "
+             "Use save_file with 'with_values' parameter for same result"),
+            FutureWarning,
+            stacklevel=2,
+        )
         expected_keys = cls._envfile.get_all_env_keys()
 
         existing: Dict[str, str] = {}

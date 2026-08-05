@@ -78,7 +78,7 @@ def test_file_creations():
 
     # Setting values and saving.
     os.environ.update(test_values)
-    ENVMod.save_example('.temp/env_example.txt')
+    ENVMod.save_file('.temp/env_example.txt')
     ENVMod.save_file(with_values=True)
 
     assert os.path.exists('.temp/env_example.txt')
