@@ -1,7 +1,5 @@
 import os
 import inspect
-import warnings
-from typing_extensions import deprecated
 from functools import wraps
 from typing import (
     Literal,
@@ -431,63 +429,6 @@ class ENVMod:
 
         with open(path, "w") as f:
             f.write(file_content)
-
-    @classmethod
-    @deprecated(
-        "ENVMod.save_example is deprecated and will be removed in version 1.4. Use save_file instead."
-    )
-    def save_example(cls, path: str = ".env_example") -> None:
-        """
-        Save an example .env file based on all registered items.
-
-        WARNING: Do not store your values in the example file,
-        it gets overwritten on secound execution.
-        """
-        warnings.warn(
-            "ENVMod.save_example is deprecated and will be removed in version 1.4. Use save_file instead.",
-            FutureWarning,
-            stacklevel=2,
-        )
-        cls._envfile._save_as_file(path)
-
-    @classmethod
-    @deprecated(
-        ("ENVMod.sync_env_file is deprecated and will be removed in version 1.4. "
-         "Use save_file with 'with_values' parameter for same result"),
-    )
-    def sync_env_file(cls, path: str = ".env") -> None:
-        """
-        Merge existing .env file with missing expected keys
-        while preserving definition order.
-        """
-        warnings.warn(
-            ("ENVMod.sync_env_file is deprecated and will be removed in version 1.4. "
-             "Use save_file with 'with_values' parameter for same result"),
-            FutureWarning,
-            stacklevel=2,
-        )
-        expected_keys = cls._envfile.get_all_env_keys()
-
-        existing: Dict[str, str] = {}
-        if os.path.exists(path):
-            with open(path) as f:
-                for line in f:
-                    if "=" in line and not line.strip().startswith("#"):
-                        key, value = line.rstrip("\n").split("=", 1)
-                        existing[key.strip()] = value.strip()
-
-        written: Set[str] = set()
-        lines: List[str] = []
-        for key in expected_keys:
-            value = existing.get(key, "")
-            lines.append(f"{key}={value}")
-            written.add(key)
-        for key, value in existing.items():
-            if key not in written:
-                lines.append(f"{key}={value}")
-
-        with open(path, "w") as f:
-            f.write("\n".join(lines) + "\n")
 
     @staticmethod
     def load_dotenv(*args: Any, **kwargs: Any) -> None:
